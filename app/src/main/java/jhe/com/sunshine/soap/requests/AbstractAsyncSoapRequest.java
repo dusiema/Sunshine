@@ -1,6 +1,5 @@
-package jhe.com.sunshine;
+package jhe.com.sunshine.soap.requests;
 
-import android.net.LocalSocketAddress;
 import android.os.AsyncTask;
 
 import org.ksoap2.HeaderProperty;
@@ -9,7 +8,6 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,4 +69,6 @@ public abstract class AbstractAsyncSoapRequest extends AsyncTask<String, Void, S
         }
         return response;
     }
+
+
 }

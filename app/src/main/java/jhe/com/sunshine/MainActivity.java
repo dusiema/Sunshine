@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +20,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapPrimitive;
+
+import jhe.com.sunshine.soap.requests.GetLanguageLoginKunde;
+import jhe.com.sunshine.soap.requests.GetSpeiseplan;
+import jhe.com.sunshine.soap.requests.Logout;
+import jhe.com.sunshine.soap.requests.SoapRequestComplete;
 
 public class MainActivity extends AppCompatActivity implements SoapRequestComplete {
 
@@ -62,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
             }
         });
 
-        runSoap();
+        runGetLanguageLoginKunde();
     }
 
 
@@ -89,15 +96,54 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
     }
 
 
-    private void runSoap() {
+    private void runGetLanguageLoginKunde() {
         GetLanguageLoginKunde soapRequest = new GetLanguageLoginKunde(this);
         soapRequest.execute(null, null, null);
     }
 
+    private void runGetSpeiseplan() {
+        GetSpeiseplan speiseplanAsync = new GetSpeiseplan(this);
+        speiseplanAsync.execute(null, null ,null);
+    }
+
+    private void runLogout() {
+        Logout logoutAsync = new Logout(this);
+        logoutAsync.execute(null, null ,null);
+    }
+
+
+    @Override
+    public void onGetLanguageLoginKundeResponse(SoapObject soapObject) {
+        runGetSpeiseplan();
+    }
+
     @Override
     public void onGetSpeiseplanResponse(SoapObject soapObject) {
+        SoapObject menuDays = (SoapObject) soapObject.getProperty("MenueDays");
+        SoapObject menuDay = (SoapObject) menuDays.getProperty("MenueDay");
+        SoapObject menuNodes = (SoapObject) menuDay.getProperty("MenueNodes");
+
+        StringBuilder menusStringBuilder = new StringBuilder();
+        for (int i = 0; i < menuNodes.getPropertyCount(); i++) {
+            SoapObject menuNode = (SoapObject) menuNodes.getProperty(i);
+            SoapPrimitive menuBez = (SoapPrimitive) menuNode.getPrimitiveProperty("MenuBez");
+            menusStringBuilder.append(menuBez.getValue());
+            menusStringBuilder.append("\n\n");
+        }
+//        SoapObject menuNode = (SoapObject) menuNodes.getProperty("MenueNode");
+//        String menuBez = (String) menuNode.getPrimitiveProperty("MenuBez");
+
+
         TextView sectionLabel = (TextView) findViewById(R.id.section_label);
-        sectionLabel.setText(soapObject.toString());
+        sectionLabel.setText(menusStringBuilder.toString());
+
+        // logout
+        runLogout();
+    }
+
+    @Override
+    public void onLogout(SoapObject soapObject) {
+        Log.i("LOGOUT", "Logout successful.\n\n");
     }
 
     /**
