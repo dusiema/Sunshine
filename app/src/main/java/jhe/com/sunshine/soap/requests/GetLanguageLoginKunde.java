@@ -1,9 +1,6 @@
-package jhe.com.sunshine;
+package jhe.com.sunshine.soap.requests;
 
-import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpTransportSE;
 
 /**
  * Created by jens on 24.01.16.
@@ -23,8 +20,8 @@ public class GetLanguageLoginKunde extends AbstractAsyncSoapRequest {
 
         // Create the outgoing message
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty(NAMESPACE, "psKundenNr", 8150815);
-        request.addProperty(NAMESPACE, "psPin", 8151);
+        request.addProperty(NAMESPACE, "psKundenNr", 123456);
+        request.addProperty(NAMESPACE, "psPin", 1234);
         request.addProperty(NAMESPACE, "pnMandantID", 1);
         request.addProperty(NAMESPACE, "psCultureDefinition", "de");
 
@@ -33,12 +30,8 @@ public class GetLanguageLoginKunde extends AbstractAsyncSoapRequest {
 
     @Override
     protected void onPostExecute(SoapObject soapObject) {
-        runGetSpeiseplan();
+        soapRequestCompleteListener.onGetLanguageLoginKundeResponse(soapObject);
     }
 
-    private void runGetSpeiseplan() {
-        GetSpeiseplan speiseplanAsync = new GetSpeiseplan(soapRequestCompleteListener);
-        speiseplanAsync.execute(null, null ,null);
-    }
 
 }

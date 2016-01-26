@@ -21,11 +21,18 @@ import android.widget.TextView;
 
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import jhe.com.sunshine.soap.requests.GetLanguageLoginKunde;
 import jhe.com.sunshine.soap.requests.GetSpeiseplan;
 import jhe.com.sunshine.soap.requests.Logout;
 import jhe.com.sunshine.soap.requests.SoapRequestComplete;
+import jhe.com.sunshine.soap.requests.objects.MenuWeek;
+import jhe.com.sunshine.soap.requests.objects.MenueDay;
+import jhe.com.sunshine.soap.requests.objects.MenueNode;
 
 public class MainActivity extends AppCompatActivity implements SoapRequestComplete {
 
@@ -43,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private MenuWeek menuWeek;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +111,12 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
 
     private void runGetSpeiseplan() {
         GetSpeiseplan speiseplanAsync = new GetSpeiseplan(this);
-        speiseplanAsync.execute(null, null ,null);
+        speiseplanAsync.execute(null, null, null);
     }
 
     private void runLogout() {
         Logout logoutAsync = new Logout(this);
-        logoutAsync.execute(null, null ,null);
+        logoutAsync.execute(null, null, null);
     }
 
 
@@ -119,24 +127,36 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
 
     @Override
     public void onGetSpeiseplanResponse(SoapObject soapObject) {
-        SoapObject menuDays = (SoapObject) soapObject.getProperty("MenueDays");
-        SoapObject menuDay = (SoapObject) menuDays.getProperty("MenueDay");
-        SoapObject menuNodes = (SoapObject) menuDay.getProperty("MenueNodes");
 
-        StringBuilder menusStringBuilder = new StringBuilder();
-        for (int i = 0; i < menuNodes.getPropertyCount(); i++) {
-            SoapObject menuNode = (SoapObject) menuNodes.getProperty(i);
-            SoapPrimitive menuBez = (SoapPrimitive) menuNode.getPrimitiveProperty("MenuBez");
-            menusStringBuilder.append(menuBez.getValue());
-            menusStringBuilder.append("\n\n");
+        menuWeek = new MenuWeek();
+
+        SoapObject menueDays = ((SoapObject) soapObject.getProperty("MenueDays"));
+
+        for (int i = 0; i < menueDays.getPropertyCount(); i++) {
+            MenueDay menuDay = new MenueDay();
+            menuWeek.getMenuDays().add(menuDay);
+
+            menuDay.setDayString("Tag" + i);
+
+            SoapObject soapObjectMenuDay = (SoapObject) menueDays.getProperty(i);
+
+            SoapPrimitive bestellbar = (SoapPrimitive) soapObjectMenuDay.getPrimitiveProperty("Bestellbar");
+            menuDay.setBestellbar(Boolean.valueOf(bestellbar.getValue().toString()));
+            if (menuDay.getBestellbar()) {
+                SoapObject soapObjectMenuNodes = (SoapObject) soapObjectMenuDay.getProperty("MenueNodes");
+
+                for (int j = 0; j < soapObjectMenuNodes.getPropertyCount(); j++) {
+                    MenueNode menueNode = new MenueNode();
+                    menuDay.getMenueNodes().add(menueNode);
+
+                    SoapObject soapObjectMenuNode = (SoapObject) soapObjectMenuNodes.getProperty(j);
+                    SoapPrimitive menuBez = (SoapPrimitive) soapObjectMenuNode.getPrimitiveProperty("MenuBez");
+                    menueNode.setMenuBezeichnung(menuBez.toString());
+                }
+            }
         }
-//        SoapObject menuNode = (SoapObject) menuNodes.getProperty("MenueNode");
-//        String menuBez = (String) menuNode.getPrimitiveProperty("MenuBez");
 
-
-        TextView sectionLabel = (TextView) findViewById(R.id.section_label);
-        sectionLabel.setText(menusStringBuilder.toString());
-
+        mSectionsPagerAdapter.notifyDataSetChanged();
         // logout
         runLogout();
     }
@@ -158,26 +178,31 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            return PlaceholderFragment.newInstance(position + 1, menuWeek.getMenuDays().get(position));
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            if (menuWeek != null && menuWeek.getMenuDays() != null && menuWeek.getMenuDays().size() > 0) {
+                return menuWeek.getMenuDays().size();
+            } else {
+                return 0;
+            }
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "SECTION 1";
-                case 1:
-                    return "SECTION 2";
-                case 2:
-                    return "SECTION 3";
+            if (menuWeek != null && menuWeek.getMenuDays() != null && menuWeek.getMenuDays().size() > 0) {
+                return menuWeek.getMenuDays().get(position).getDayString();
+            } else {
+                switch (position) {
+                    case 0:
+                        return "SECTION 1";
+                    case 1:
+                        return "SECTION 2";
+                    case 2:
+                        return "SECTION 3";
+                }
             }
             return null;
         }
@@ -187,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+        private MenueDay menuDay;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -197,8 +223,9 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
+        public static PlaceholderFragment newInstance(int sectionNumber, MenueDay menueDay) {
             PlaceholderFragment fragment = new PlaceholderFragment();
+            fragment.menuDay = menueDay;
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -213,7 +240,14 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+
+            StringBuilder sb = new StringBuilder();
+            for (MenueNode menueNode : menuDay.getMenueNodes()) {
+                sb.append(menueNode.getMenuBezeichnung());
+                sb.append("\n\n");
+            }
+            textView.setText(sb.toString());
+
             return rootView;
         }
     }
