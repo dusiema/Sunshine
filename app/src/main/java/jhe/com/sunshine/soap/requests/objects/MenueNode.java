@@ -8,6 +8,15 @@ import java.util.List;
  */
 public class MenueNode {
     String menuBezeichnung;
+    Integer bestellteMenge;
+
+    public Integer getBestellteMenge() {
+        return bestellteMenge;
+    }
+
+    public void setBestellteMenge(Integer bestellteMenge) {
+        this.bestellteMenge = bestellteMenge;
+    }
 
     public String getMenuBezeichnung() {
         return menuBezeichnung;

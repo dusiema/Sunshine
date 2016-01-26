@@ -136,9 +136,8 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
             MenueDay menuDay = new MenueDay();
             menuWeek.getMenuDays().add(menuDay);
 
-            menuDay.setDayString("Tag" + i);
-
             SoapObject soapObjectMenuDay = (SoapObject) menueDays.getProperty(i);
+            menuDay.setDayString(soapObjectMenuDay.getPrimitivePropertyAsString("Datum"));
 
             SoapPrimitive bestellbar = (SoapPrimitive) soapObjectMenuDay.getPrimitiveProperty("Bestellbar");
             menuDay.setBestellbar(Boolean.valueOf(bestellbar.getValue().toString()));
@@ -152,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
                     SoapObject soapObjectMenuNode = (SoapObject) soapObjectMenuNodes.getProperty(j);
                     SoapPrimitive menuBez = (SoapPrimitive) soapObjectMenuNode.getPrimitiveProperty("MenuBez");
                     menueNode.setMenuBezeichnung(menuBez.toString());
+
+                    SoapPrimitive bestellteMenge = (SoapPrimitive) soapObjectMenuNode.getPrimitiveProperty("BestMenge");
+                    menueNode.setBestellteMenge(Integer.parseInt(bestellteMenge.getValue().toString()));
                 }
             }
         }
@@ -242,7 +244,11 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 
             StringBuilder sb = new StringBuilder();
+            sb.append("Tag: " + menuDay.getDayString() + "\n\n\n");
             for (MenueNode menueNode : menuDay.getMenueNodes()) {
+                if (menueNode.getBestellteMenge() > 0) {
+                    sb.append("BESTELLT:\n");
+                }
                 sb.append(menueNode.getMenuBezeichnung());
                 sb.append("\n\n");
             }
