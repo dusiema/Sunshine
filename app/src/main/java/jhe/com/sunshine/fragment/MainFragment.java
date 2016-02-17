@@ -1,31 +1,26 @@
-package jhe.com.sunshine;
+package jhe.com.sunshine.fragment;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.TextView;
 
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
-import org.w3c.dom.Text;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import jhe.com.sunshine.R;
+import jhe.com.sunshine.activity.MainActivity;
 import jhe.com.sunshine.soap.requests.GetLanguageLoginKunde;
 import jhe.com.sunshine.soap.requests.GetSpeiseplan;
 import jhe.com.sunshine.soap.requests.Logout;
@@ -34,7 +29,20 @@ import jhe.com.sunshine.soap.requests.objects.MenuWeek;
 import jhe.com.sunshine.soap.requests.objects.MenueDay;
 import jhe.com.sunshine.soap.requests.objects.MenueNode;
 
-public class MainActivity extends AppCompatActivity implements SoapRequestComplete {
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link MainFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link MainFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class MainFragment extends Fragment implements SoapRequestComplete {
+
+    /**
+     * The {@link ViewPager} that will host the section contents.
+     */
+    private ViewPager mViewPager;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -46,75 +54,101 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager mViewPager;
     private MenuWeek menuWeek;
 
+    private OnFragmentInteractionListener mListener;
+
+
+    public MainFragment() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @return A new instance of fragment MainFragment.
+     */
+    public static MainFragment newInstance() {
+        MainFragment fragment = new MainFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+    }
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+    @Override
+    public void onResume() {
+        super.onResume();
 
         runGetLanguageLoginKunde();
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_week_menu, container, false);
+
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getActivity().getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) view.findViewById(R.id.menu_viewpager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        // Inflate the layout for this fragment
+        return view;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
 
     private void runGetLanguageLoginKunde() {
-        GetLanguageLoginKunde soapRequest = new GetLanguageLoginKunde(this);
-        soapRequest.execute(null, null, null);
+        getActivity().setTitle("Login...");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String user = prefs.getString("username1", null);
+        String pin = prefs.getString("pin1", null);
+        if (user != null & pin != null) {
+            GetLanguageLoginKunde soapRequest = new GetLanguageLoginKunde(this, user, pin);
+            soapRequest.execute(null, null, null);
+        }
     }
 
     private void runGetSpeiseplan() {
+        getActivity().setTitle("Speiseplan laden...");
         GetSpeiseplan speiseplanAsync = new GetSpeiseplan(this);
         speiseplanAsync.execute(null, null, null);
     }
 
     private void runLogout() {
+        getActivity().setTitle("Fertig");
         Logout logoutAsync = new Logout(this);
         logoutAsync.execute(null, null, null);
     }
@@ -167,6 +201,24 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
     public void onLogout(SoapObject soapObject) {
         Log.i("LOGOUT", "Logout successful.\n\n");
     }
+
+
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -240,7 +292,8 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+            View rootView = inflater.inflate(R.layout.day, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 
             StringBuilder sb = new StringBuilder();
@@ -257,4 +310,5 @@ public class MainActivity extends AppCompatActivity implements SoapRequestComple
             return rootView;
         }
     }
+
 }

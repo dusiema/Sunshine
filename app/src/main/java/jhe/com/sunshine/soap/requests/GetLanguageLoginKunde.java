@@ -1,5 +1,8 @@
 package jhe.com.sunshine.soap.requests;
 
+import android.content.SharedPreferences;
+import android.support.v7.preference.PreferenceManager;
+
 import org.ksoap2.serialization.SoapObject;
 
 /**
@@ -7,8 +10,13 @@ import org.ksoap2.serialization.SoapObject;
  */
 public class GetLanguageLoginKunde extends AbstractAsyncSoapRequest {
 
-    public GetLanguageLoginKunde(SoapRequestComplete completeListener) {
+    private final String user;
+    private final String pin;
+
+    public GetLanguageLoginKunde(SoapRequestComplete completeListener, String user, String pin) {
         soapRequestCompleteListener = completeListener;
+        this.user = user;
+        this.pin = pin;
     }
 
     @Override
@@ -20,8 +28,8 @@ public class GetLanguageLoginKunde extends AbstractAsyncSoapRequest {
 
         // Create the outgoing message
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty(NAMESPACE, "psKundenNr", 123456);
-        request.addProperty(NAMESPACE, "psPin", 1234);
+        request.addProperty(NAMESPACE, "psKundenNr", user);
+        request.addProperty(NAMESPACE, "psPin", pin);
         request.addProperty(NAMESPACE, "pnMandantID", 1);
         request.addProperty(NAMESPACE, "psCultureDefinition", "de");
 

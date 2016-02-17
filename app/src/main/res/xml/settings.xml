@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="pref_key_storage_settings"
+        android:title="Zugangsdaten 1">
+        <EditTextPreference
+            android:key="username1"
+            android:summary="Kundennummer 1"
+            android:title="Kundennummer1"></EditTextPreference>
+        <EditTextPreference
+            android:key="pin1"
+            android:summary="PIN 1"
+            android:title="PIN1"></EditTextPreference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="pref_key_storage_settings"
+        android:title="Zugangsdaten 2">
+        <EditTextPreference
+            android:key="username2"
+            android:summary="Kundennummer 2"
+            android:title="Kundennummer2"></EditTextPreference>
+        <EditTextPreference
+            android:key="pin2"
+            android:summary="PIN 2"
+            android:title="PIN2"></EditTextPreference>
+    </PreferenceCategory>
+
+</PreferenceScreen>

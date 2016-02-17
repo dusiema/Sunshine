@@ -2,6 +2,9 @@ package jhe.com.sunshine.soap.requests;
 
 import org.ksoap2.serialization.SoapObject;
 
+import java.util.Calendar;
+import java.util.Locale;
+
 /**
  * Created by jens on 24.01.16.
  */
@@ -19,8 +22,8 @@ public class GetSpeiseplan extends AbstractAsyncSoapRequest {
 
         // Create the outgoing message
         SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
-        request.addProperty(NAMESPACE, "week", 4);
-        request.addProperty(NAMESPACE, "year", 2016);
+        request.addProperty(NAMESPACE, "week", Calendar.getInstance(Locale.getDefault()).get(Calendar.WEEK_OF_YEAR));
+        request.addProperty(NAMESPACE, "year", Calendar.getInstance(Locale.getDefault()).get(Calendar.YEAR));
 
         return runSoapRequest(request);
     }

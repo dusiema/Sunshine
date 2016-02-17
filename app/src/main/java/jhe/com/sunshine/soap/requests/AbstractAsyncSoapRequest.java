@@ -19,6 +19,7 @@ public abstract class AbstractAsyncSoapRequest extends AsyncTask<String, Void, S
 
     protected SoapRequestComplete soapRequestCompleteListener;
 
+    final int REQUEST_TIMEOUT = 45000; // 45 Sekunden
     final String NAMESPACE = "http://www.MBS5.de/WebServices";
     final String SOAP_ACTION = "";
     final String URL = "http://ibs.sunshine-catering.de/ibs/ibswebservice/IbsWebService.asmx";
@@ -32,7 +33,7 @@ public abstract class AbstractAsyncSoapRequest extends AsyncTask<String, Void, S
 
         // Create a transport layer for the J2SE platform. You should change this for
         // another transport on midp or j2me devices.
-        HttpTransportSE transportSE = new HttpTransportSE(URL);
+        HttpTransportSE transportSE = new HttpTransportSE(URL, REQUEST_TIMEOUT);
         // turn on debug mode if you want to see what is happening over the wire.
 
         if (sessionCookieValue != null) {
