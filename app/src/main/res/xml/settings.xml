@@ -15,6 +15,12 @@
     <PreferenceCategory
         android:key="pref_key_storage_settings"
         android:title="Zugangsdaten 2">
+        <CheckBoxPreference
+            android:title="Aktivere Konto 2?"
+            android:defaultValue="false"
+            android:key="account2Active"
+            android:summaryOn="Konto 2 aktiv"
+            android:summaryOff="Konto 1 aktiv"/>
         <EditTextPreference
             android:key="username2"
             android:summary="Kundennummer 2"

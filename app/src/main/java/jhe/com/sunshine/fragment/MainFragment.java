@@ -133,8 +133,14 @@ public class MainFragment extends Fragment implements SoapRequestComplete {
     private void runGetLanguageLoginKunde() {
         getActivity().setTitle("Login...");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+
         String user = prefs.getString("username1", null);
         String pin = prefs.getString("pin1", null);
+
+        if (prefs.getBoolean("account2Active", false)) {
+            user = prefs.getString("username2", null);
+            pin = prefs.getString("pin2", null);
+        }
         if (user != null & pin != null) {
             GetLanguageLoginKunde soapRequest = new GetLanguageLoginKunde(this, user, pin);
             soapRequest.execute(null, null, null);
@@ -298,14 +304,23 @@ public class MainFragment extends Fragment implements SoapRequestComplete {
 
             StringBuilder sb = new StringBuilder();
             sb.append("Tag: " + menuDay.getDayString() + "\n\n\n");
-            for (MenueNode menueNode : menuDay.getMenueNodes()) {
-                if (menueNode.getBestellteMenge() > 0) {
-                    sb.append("BESTELLT:\n");
-                }
-                sb.append(menueNode.getMenuBezeichnung());
+            if (menuDay.getMenueNodes().isEmpty()) {
+                sb.append("Kein Menu verfügbar...");
                 sb.append("\n\n");
+            } else {
+                for (MenueNode menueNode : menuDay.getMenueNodes()) {
+                    if (menueNode.getBestellteMenge() > 0) {
+                        sb.append("BESTELLT:\n");
+                    }
+                    sb.append(menueNode.getMenuBezeichnung());
+                    sb.append("\n\n");
+                }
             }
-            textView.setText(sb.toString());
+            if (sb.toString().isEmpty()) {
+                textView.setText("Kein Menu verfügbar...");
+            } else {
+                textView.setText(sb.toString());
+            }
 
             return rootView;
         }
