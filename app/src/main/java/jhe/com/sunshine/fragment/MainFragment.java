@@ -10,6 +10,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +21,14 @@ import android.widget.TextView;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import jhe.com.sunshine.R;
 import jhe.com.sunshine.activity.MainActivity;
+import jhe.com.sunshine.adapter.MenuAdapter;
 import jhe.com.sunshine.soap.requests.GetLanguageLoginKunde;
 import jhe.com.sunshine.soap.requests.GetSpeiseplan;
 import jhe.com.sunshine.soap.requests.Logout;
@@ -300,27 +308,24 @@ public class MainFragment extends Fragment implements SoapRequestComplete {
                                  Bundle savedInstanceState) {
 
             View rootView = inflater.inflate(R.layout.day, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("Tag: " + menuDay.getDayString() + "\n\n\n");
-            if (menuDay.getMenueNodes().isEmpty()) {
-                sb.append("Kein Menu verfügbar...");
-                sb.append("\n\n");
-            } else {
-                for (MenueNode menueNode : menuDay.getMenueNodes()) {
-                    if (menueNode.getBestellteMenge() > 0) {
-                        sb.append("BESTELLT:\n");
-                    }
-                    sb.append(menueNode.getMenuBezeichnung());
-                    sb.append("\n\n");
-                }
+
+            TextView menuDayTextView = (TextView) rootView.findViewById(R.id.menuDay);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+            Date dayOfTheWeek = null;
+            try {
+                dayOfTheWeek = sdf.parse(menuDay.getDayString());
+                menuDayTextView.setText(android.text.format.DateFormat.format("EEEE", dayOfTheWeek));
+            } catch (ParseException pe) {
+                menuDayTextView.setText(menuDay.getDayString());
             }
-            if (sb.toString().isEmpty()) {
-                textView.setText("Kein Menu verfügbar...");
-            } else {
-                textView.setText(sb.toString());
-            }
+
+            RecyclerView menuList = (RecyclerView) rootView.findViewById(R.id.menuList);
+            LinearLayoutManager llm = new LinearLayoutManager(getContext());
+            menuList.setLayoutManager(llm);
+
+            MenuAdapter menuAdapter = new MenuAdapter(menuDay.getMenueNodes());
+            menuList.setAdapter(menuAdapter);
 
             return rootView;
         }
